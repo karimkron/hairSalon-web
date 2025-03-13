@@ -3,7 +3,12 @@ import AdminLayout from './components/layout/AdminLayout';
 import ServicesList from './pages/services/ServicesList';
 import ServiceForm from './components/forms/ServiceForm';
 import LoginPage from './pages/auth/LoginPage';
+import AdminRegisterPage from './pages/auth/AdminRegisterPage'; // Importamos la nueva página
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRegistrationForm from './components/auth/AdminRegistrationForm'
+import ForgotPasswordPage from './components/auth/ForgotPasswordPage';
+import ResetPasswordPage from './components/auth/ResetPasswordPage';
+import PasswordUpdatedPage from './components/auth/PasswordUpdatedPage';
 
 function App() {
   return (
@@ -14,6 +19,21 @@ function App() {
 
         {/* Ruta de login */}
         <Route path="/login" element={<LoginPage />} />
+
+        {/* Ruta de registro de administradores */}
+        <Route path="/admin/register" element={<AdminRegisterPage />} />
+
+         {/* Ruta de formulario de registro de administradores */}
+         <Route path="/admin/register-form" element={<AdminRegistrationForm />} />
+
+        {/* Rutas de autenticación */}
+         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        {/* ruta recuperar contraseña */}
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+        {/* Ruta de contraseña actualizada */}
+          <Route path="/password-updated" element={<PasswordUpdatedPage />} />
 
         {/* Rutas protegidas */}
         <Route element={<ProtectedRoute />}>
