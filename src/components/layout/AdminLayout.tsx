@@ -14,7 +14,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     <div className="min-h-screen bg-gray-50">
       <Sidebar />
       <div className={`transition-all duration-300 
-        ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>  {/* Aquí está el cambio clave */}
+        ${isSidebarOpen ? 'md:ml-64' : 'md:ml-16'}`}>  {/* Aquí está el cambio clave */}
         <Header />
         <main className="p-0 pb-20 md:pb-6">
           {children}

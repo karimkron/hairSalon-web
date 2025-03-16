@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface AdminCodeFormProps {
-  email: string; // Definimos la propiedad email
+  email: string; // Definimos la propiedad email como string
 }
 
 const AdminCodeForm: React.FC<AdminCodeFormProps> = ({ email }) => {

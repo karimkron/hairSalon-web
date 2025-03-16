@@ -1,4 +1,4 @@
-import { Home, Users, Calendar, Scissors, DollarSign, Settings, Menu, X } from 'lucide-react';
+import { Home, Users, Calendar, Scissors, DollarSign, Settings, Menu, X, ShoppingBag } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useUIStore } from '../../store/uiStore';
 
@@ -10,6 +10,8 @@ const Sidebar = () => {
     { icon: Home, name: 'Dashboard', path: '/admin' },
     { icon: Calendar, name: 'Citas', path: '/admin/appointments' },
     { icon: Scissors, name: 'Servicios', path: '/admin/services' },
+    { icon: ShoppingBag, name: 'Productos', path: '/admin/products' },
+    { icon: Users, name: 'Usuarios', path: '/admin/users' },
     { icon: Users, name: 'Barberos', path: '/admin/barbers' },
     { icon: Users, name: 'Clientes', path: '/admin/clients' },
     { icon: DollarSign, name: 'Ventas', path: '/admin/sales' },
@@ -22,12 +24,12 @@ const Sidebar = () => {
       <aside 
         className={`fixed left-0 top-0 h-screen bg-white border-r transition-all duration-300 z-40
           hidden md:block
-          ${isSidebarOpen ? 'w-64' : 'w-20'}`}
+          ${isSidebarOpen ? 'w-64' : 'w-16'}`}
       >
         {/* Logo y botón de toggle */}
-        <div className="flex items-center h-16 px-4 border-b">
+        <div className="flex items-center h-16 px-2 border-b">
           {isSidebarOpen ? (
-            <div className="flex justify-between items-center w-full">
+            <div className="flex justify-around  items-center  w-full">
               <span className="text-xl font-bold">BARBERSHOP</span>
               <button 
                 onClick={toggleSidebar}
@@ -39,7 +41,7 @@ const Sidebar = () => {
           ) : (
             <button 
               onClick={toggleSidebar}
-              className="p-2 hover:bg-gray-100 rounded-lg mx-auto"
+              className="p-4 hover:bg-gray-100 rounded-lg "
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -47,7 +49,7 @@ const Sidebar = () => {
         </div>
 
         {/* Menú */}
-        <nav className="p-4 space-y-2">
+        <nav className="p-1 space-y-2">
           {menuItems.map((item) => (
             <Link
               key={item.path}

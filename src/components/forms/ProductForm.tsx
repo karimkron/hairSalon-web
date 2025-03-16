@@ -1,29 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useServiceStore } from '../../store/services';
+import { useProductStore, Product } from '../../store/products';
 
-interface Service {
-  id?: string;
-  name: string;
-  description: string;
-  price: number;
-  points: number;
-  duration: number;  // Cambiado a number
-  category: string;
-  image: File | string | null;
-}
-
-const ServiceForm = () => {
+const ProductForm = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const { services, addService, updateService } = useServiceStore();
-  const [service, setService] = useState<Service>({
+  const { products, addProduct, updateProduct } = useProductStore();
+  const [product, setProduct] = useState<Product>({
     name: '',
+    brand: '',
     description: '',
     price: 0,
-    points: 0,
-    duration: 1,  // Inicializado como número
-    category: '',
+    stock: 0,
+    available: true,
     image: null,
   });
 
@@ -31,16 +20,16 @@ const ServiceForm = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-   useEffect(() => {
+  useEffect(() => {
     if (id) {
-      const existingService = services.find((s) => s._id === id);
-      if (existingService) {
-        setService({
-          ...existingService,
-          duration: existingService.duration,
+      const existingProduct = products.find((p) => p._id === id);
+      if (existingProduct) {
+        setProduct({
+          ...existingProduct,
+          image: existingProduct.image || null,
         });
-        setImageUrl(existingService.image || '');
-        setImageOption(existingService.image ? 'url' : 'none');
+        setImageUrl(typeof existingProduct.image === 'string' ? existingProduct.image : '');
+        setImageOption(existingProduct.image ? 'url' : 'none');
       }
     }
   }, [id]);
@@ -56,14 +45,10 @@ const ServiceForm = () => {
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
+    if (!product.name.trim()) newErrors.name = 'Nombre requerido';
+    if (product.price <= 0) newErrors.price = 'Precio inválido';
+    if (product.stock < 0) newErrors.stock = 'Stock inválido';
     
-    if (!service.name.trim()) newErrors.name = 'Nombre requerido';
-    if (!service.description.trim()) newErrors.description = 'Descripción requerida';
-    if (service.price <= 0) newErrors.price = 'Precio inválido';
-    if (service.points < 0) newErrors.points = 'Puntos inválidos';
-    if (service.duration < 1) newErrors.duration = 'Duración mínima: 1 hora';
-    if (!service.category.trim()) newErrors.category = 'Categoría requerida';
-
     if (imageOption === 'url' && !isValidUrl(imageUrl)) {
       newErrors.image = 'URL inválida';
     }
@@ -75,8 +60,11 @@ const ServiceForm = () => {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setService(prev => ({ ...prev, image: file }));
-      setErrors(prev => ({ ...prev, image: '' }));
+      setProduct((prev: Product) => ({ 
+        ...prev, 
+        image: file 
+      }));
+      setErrors((prev) => ({ ...prev, image: '' }));
     }
   };
 
@@ -84,9 +72,9 @@ const ServiceForm = () => {
     const url = e.target.value;
     setImageUrl(url);
     if (url && !isValidUrl(url)) {
-      setErrors(prev => ({ ...prev, image: 'URL inválida' }));
+      setErrors((prev) => ({ ...prev, image: 'URL inválida' }));
     } else {
-      setErrors(prev => ({ ...prev, image: '' }));
+      setErrors((prev) => ({ ...prev, image: '' }));
     }
   };
 
@@ -95,17 +83,17 @@ const ServiceForm = () => {
     if (!validateForm()) return;
 
     const formData = new FormData();
-    formData.append('name', service.name);
-    formData.append('description', service.description);
-    formData.append('price', service.price.toString());
-    formData.append('points', service.points.toString());
-    formData.append('duration', service.duration.toString());
-    formData.append('category', service.category);
+    formData.append('name', product.name);
+    formData.append('brand', product.brand);
+    formData.append('description', product.description);
+    formData.append('price', product.price.toString());
+    formData.append('stock', product.stock.toString());
+    formData.append('available', product.available.toString());
 
     switch (imageOption) {
       case 'upload':
-        if (service.image instanceof File) {
-          formData.append('image', service.image);
+        if (product.image && typeof product.image !== 'string') {
+          formData.append('image', product.image);
         }
         break;
       case 'url':
@@ -118,26 +106,26 @@ const ServiceForm = () => {
 
     try {
       if (id) {
-        await updateService(id, formData);
+        await updateProduct(id, formData);
       } else {
-        await addService(formData);
+        await addProduct(formData);
       }
-      navigate('/admin/services');
+      navigate('/admin/products');
     } catch (error: any) {
-      setErrors({ general: error.message || 'Error al guardar el servicio' });
+      setErrors({ general: error.message || 'Error al guardar el producto' });
     }
   };
 
   return (
-    <div className=" inset-0 flex items-center justify-center">
+    <div className="inset-0 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">
-              {id ? 'Editar Servicio' : 'Nuevo Servicio'}
+              {id ? 'Editar Producto' : 'Nuevo Producto'}
             </h2>
             <button
-              onClick={() => navigate('/admin/services')}
+              onClick={() => navigate('/admin/products')}
               className="text-gray-500 hover:text-gray-700 text-2xl"
             >
               &times;
@@ -150,9 +138,8 @@ const ServiceForm = () => {
                 <label className="block text-sm font-medium text-gray-700">Nombre</label>
                 <input
                   type="text"
-                  name="name"
-                  value={service.name}
-                  onChange={(e) => setService({...service, name: e.target.value})}
+                  value={product.name}
+                  onChange={(e) => setProduct({...product, name: e.target.value})}
                   className={`mt-1 block w-full border ${
                     errors.name ? 'border-red-500' : 'border-gray-300'
                   } rounded-md shadow-sm p-2`}
@@ -161,30 +148,21 @@ const ServiceForm = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Categoría</label>
-                <select
-                  name="category"
-                  value={service.category}
-                  onChange={(e) => setService({...service, category: e.target.value})}
+                <label className="block text-sm font-medium text-gray-700">Marca (opcional)</label>
+                <input
+                  type="text"
+                  value={product.brand}
+                  onChange={(e) => setProduct({...product, brand: e.target.value})}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                >
-                  <option value="">Selecciona una categoría</option>
-                  <option value="Cortes Clásicos">Cortes Clásicos</option>
-                  <option value="Servicios Premium">Servicios Premium</option>
-                  <option value="Tratamientos Especiales">Tratamientos Especiales</option>
-                </select>
-                {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
+                />
               </div>
-
-              
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">Precio</label>
                 <input
                   type="number"
-                  name="price"
-                  value={service.price}
-                  onChange={(e) => setService({...service, price: Number(e.target.value)})}
+                  value={product.price}
+                  onChange={(e) => setProduct({...product, price: Number(e.target.value)})}
                   className={`mt-1 block w-full border ${
                     errors.price ? 'border-red-500' : 'border-gray-300'
                   } rounded-md shadow-sm p-2`}
@@ -193,48 +171,36 @@ const ServiceForm = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Puntos</label>
+                <label className="block text-sm font-medium text-gray-700">Stock</label>
                 <input
                   type="number"
-                  name="points"
-                  value={service.points}
-                  onChange={(e) => setService({...service, points: Number(e.target.value)})}
+                  value={product.stock}
+                  onChange={(e) => setProduct({...product, stock: Number(e.target.value)})}
                   className={`mt-1 block w-full border ${
-                    errors.points ? 'border-red-500' : 'border-gray-300'
+                    errors.stock ? 'border-red-500' : 'border-gray-300'
                   } rounded-md shadow-sm p-2`}
                 />
-                {errors.points && <p className="text-red-500 text-sm mt-1">{errors.points}</p>}
+                {errors.stock && <p className="text-red-500 text-sm mt-1">{errors.stock}</p>}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Duración (horas)</label>
+              <div className="flex items-center gap-2">
                 <input
-                  type="number"
-                  name="duration"
-                  value={service.duration}
-                  onChange={(e) => setService({...service, duration: Number(e.target.value)})}
-                  min="1"
-                  className={`mt-1 block w-full border ${
-                    errors.duration ? 'border-red-500' : 'border-gray-300'
-                  } rounded-md shadow-sm p-2`}
+                  type="checkbox"
+                  checked={product.available}
+                  onChange={(e) => setProduct({...product, available: e.target.checked})}
+                  className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                 />
-                {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration}</p>}
+                <label className="text-sm text-gray-700">Disponible</label>
               </div>
-
-              
 
               <div className="block">
                 <label className="block text-sm font-medium text-gray-700">Descripción</label>
                 <textarea
-                  name="description"
-                  value={service.description}
-                  onChange={(e) => setService({...service, description: e.target.value})}
-                  className={`mt-1 block w-full border ${
-                    errors.description ? 'border-red-500' : 'border-gray-300'
-                  } rounded-md shadow-sm p-2`}
-                  rows={4}
+                  value={product.description}
+                  onChange={(e) => setProduct({...product, description: e.target.value})}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  rows={3}
                 />
-                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
               </div>
 
               <div className="block">
@@ -302,8 +268,6 @@ const ServiceForm = () => {
                   </div>
                 )}
               </div>
-
-              
             </div>
 
             {errors.general && (
@@ -315,7 +279,7 @@ const ServiceForm = () => {
                 type="submit"
                 className="bg-amber-600 text-white px-6 py-2 rounded-md hover:bg-amber-700"
               >
-                {id ? 'Actualizar Servicio' : 'Crear Servicio'}
+                {id ? 'Actualizar Producto' : 'Crear Producto'}
               </button>
             </div>
           </form>
@@ -325,4 +289,4 @@ const ServiceForm = () => {
   );
 };
 
-export default ServiceForm;
+export default ProductForm;
