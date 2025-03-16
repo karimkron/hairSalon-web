@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Edit, Lock, Unlock, Key } from 'lucide-react';
+import { Search, Edit } from 'lucide-react';
 import { useUserStore } from '../../store/userStore';
 
 const UsersList = () => {
-  const { users, fetchUsers, toggleBlockUser, updatePassword } = useUserStore();
+  const { users, fetchUsers } = useUserStore();
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -14,35 +14,11 @@ const UsersList = () => {
   const filteredUsers = users.filter((user) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      user.name.toLowerCase().includes(searchLower) ||
-      user.email.toLowerCase().includes(searchLower) ||
-      user.phone?.toLowerCase().includes(searchLower)
+      user.name?.toLowerCase().includes(searchLower) || // Usar encadenamiento opcional
+      user.email?.toLowerCase().includes(searchLower) || // Usar encadenamiento opcional
+      user.phone?.toLowerCase().includes(searchLower) // Usar encadenamiento opcional
     );
   });
-
-  const handleToggleBlock = async (id: string, isBlocked: boolean) => {
-    const confirmAction = window.confirm(`¿Seguro que quieres ${isBlocked ? 'desbloquear' : 'bloquear'} este usuario?`);
-    if (confirmAction) {
-      try {
-        await toggleBlockUser(id, isBlocked);
-        fetchUsers(); // Refrescar la lista de usuarios
-      } catch (error) {
-        console.error('Error al bloquear/desbloquear usuario:', error);
-      }
-    }
-  };
-
-  const handleUpdatePassword = async (id: string) => {
-    const newPassword = window.prompt('Ingresa la nueva contraseña:');
-    if (newPassword) {
-      try {
-        await updatePassword(id, newPassword);
-        alert('Contraseña actualizada correctamente');
-      } catch (error) {
-        console.error('Error al actualizar la contraseña:', error);
-      }
-    }
-  };
 
   return (
     <div className="p-4 md:p-6">
@@ -113,23 +89,6 @@ const UsersList = () => {
                       <Edit className="w-4 h-4" />
                       <span>Editar</span>
                     </Link>
-                    <button onClick={() => handleToggleBlock(user._id, !user.isBlocked)} className="flex items-center gap-1 text-amber-600 hover:text-amber-700">
-                      {user.isBlocked ? (
-                        <>
-                          <Unlock className="w-4 h-4" />
-                          <span>Desbloquear</span>
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="w-4 h-4" />
-                          <span>Bloquear</span>
-                        </>
-                      )}
-                    </button>
-                    <button onClick={() => handleUpdatePassword(user._id)} className="flex items-center gap-1 text-purple-600 hover:text-purple-700">
-                      <Key className="w-4 h-4" />
-                      <span>Contraseña</span>
-                    </button>
                   </div>
                 </td>
               </tr>
