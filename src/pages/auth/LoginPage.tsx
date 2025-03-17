@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Importamos Link
+import { useNavigate, Link } from 'react-router-dom';
+import { useUserStore } from '../../store/userStore'; // Importar el store de usuario
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { setCurrentUser } = useUserStore(); // Obtener la función para establecer el usuario actual
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,10 +26,19 @@ const LoginPage = () => {
       if (response.ok) {
         // Guardar el token en localStorage
         localStorage.setItem('token', data.token);
+
+        // Guardar el usuario en el store
+        setCurrentUser(data.user);
+
         // Redirigir al panel de administración
         navigate('/admin');
       } else {
-        setError(data.message || 'Error durante el inicio de sesión');
+        // Verificar si la cuenta está bloqueada
+        if (data.message === 'Cuenta bloqueada') {
+          setError(`Tu cuenta ha sido bloqueada. Por favor, contacta con el soporte: ${data.superadminEmail}`);
+        } else {
+          setError(data.message || 'Error durante el inicio de sesión');
+        }
       }
     } catch (error) {
       setError('Error de conexión. Inténtalo de nuevo.');

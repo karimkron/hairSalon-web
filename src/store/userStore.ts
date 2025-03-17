@@ -15,6 +15,8 @@ export interface User {
 // Definición de la interfaz UserStore
 interface UserStore {
   users: User[];
+  currentUser: User | null; // Nuevo estado para el usuario actual
+  setCurrentUser: (user: User | null) => void; // Función para establecer el usuario actual
   fetchUsers: () => Promise<void>;
   updateUser: (id: string, user: Partial<User>) => Promise<void>;
   updatePassword: (id: string, newPassword: string) => Promise<void>;
@@ -25,6 +27,10 @@ interface UserStore {
 // Creación del store usando Zustand
 export const useUserStore = create<UserStore>((set) => ({
   users: [],
+  currentUser: null, // Inicialmente no hay usuario actual
+
+  // Función para establecer el usuario actual
+  setCurrentUser: (user) => set({ currentUser: user }),
 
   // Función para obtener todos los usuarios
   fetchUsers: async () => {

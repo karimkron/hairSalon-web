@@ -1,22 +1,31 @@
 import { Home, Users, Calendar, Scissors, DollarSign, Settings, Menu, X, ShoppingBag } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useUIStore } from '../../store/uiStore';
+import { useUserStore } from '../../store/userStore'; // Importar el store de usuario
 
 const Sidebar = () => {
   const location = useLocation();
   const { isSidebarOpen, toggleSidebar } = useUIStore();
+  const { currentUser } = useUserStore(); // Obtener el usuario actual
 
+  // Definir los elementos del menú
   const menuItems = [
     { icon: Home, name: 'Dashboard', path: '/admin' },
     { icon: Calendar, name: 'Citas', path: '/admin/appointments' },
     { icon: Scissors, name: 'Servicios', path: '/admin/services' },
     { icon: ShoppingBag, name: 'Productos', path: '/admin/products' },
-    { icon: Users, name: 'Usuarios', path: '/admin/users' },
-    { icon: Users, name: 'Barberos', path: '/admin/barbers' },
-    { icon: Users, name: 'Clientes', path: '/admin/clients' },
+    { icon: Users, name: 'Usuarios', path: '/admin/users', role: 'superadmin' }, // Solo para superadmin
     { icon: DollarSign, name: 'Ventas', path: '/admin/sales' },
     { icon: Settings, name: 'Configuración', path: '/admin/settings' },
   ];
+
+  // Filtrar los elementos del menú según el rol del usuario
+  const filteredMenuItems = menuItems.filter((item) => {
+    if (item.role) {
+      return currentUser?.role === item.role; // Mostrar solo si el rol del usuario coincide
+    }
+    return true; // Mostrar siempre si no tiene restricción de rol
+  });
 
   return (
     <>
@@ -29,7 +38,7 @@ const Sidebar = () => {
         {/* Logo y botón de toggle */}
         <div className="flex items-center h-16 px-2 border-b">
           {isSidebarOpen ? (
-            <div className="flex justify-around  items-center  w-full">
+            <div className="flex justify-around items-center w-full">
               <span className="text-xl font-bold">BARBERSHOP</span>
               <button 
                 onClick={toggleSidebar}
@@ -41,7 +50,7 @@ const Sidebar = () => {
           ) : (
             <button 
               onClick={toggleSidebar}
-              className="p-4 hover:bg-gray-100 rounded-lg "
+              className="p-4 hover:bg-gray-100 rounded-lg"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -50,7 +59,7 @@ const Sidebar = () => {
 
         {/* Menú */}
         <nav className="p-1 space-y-2">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
@@ -70,7 +79,7 @@ const Sidebar = () => {
       {/* Navegación móvil inferior */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t md:hidden z-40">
         <div className="grid grid-cols-5 gap-1">
-          {menuItems.slice(0, 5).map((item) => (
+          {filteredMenuItems.slice(0, 5).map((item) => (
             <Link
               key={item.path}
               to={item.path}
