@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import { useProductStore } from '../../store/products';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useProductStore } from "../../store/products";
+import { Link } from "react-router-dom";
 
 const ProductsList = () => {
   const { products, fetchProducts, deleteProduct } = useProductStore();
   const [deletingProduct, setDeletingProduct] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProducts().catch(error => {
-      console.error('Error fetching products:', error);
+    fetchProducts().catch((error) => {
+      console.error("Error fetching products:", error);
     });
   }, [fetchProducts]);
 
@@ -18,7 +18,9 @@ const ProductsList = () => {
 
   return (
     <div className="p-2 md:p-6">
-      <h1 className="text-2xl font-bold mb-6 text-center">Lista de Productos</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        Lista de Productos
+      </h1>
       <Link
         to="/admin/products/create"
         className="bg-amber-600 text-white px-4 py-2 rounded-md mb-6 inline-block hover:bg-amber-700"
@@ -39,12 +41,15 @@ const ProductsList = () => {
           </thead>
           <tbody>
             {products.map((product) => (
-              <tr key={product._id} className="hover:bg-gray-50 transition-colors relative">
+              <tr
+                key={product._id}
+                className="hover:bg-gray-50 transition-colors relative"
+              >
                 <td className="py-4 px-4 border-b">
-                  {product.image && product.image !== 'none' ? (
+                  {product.mainImage && product.mainImage !== "none" ? (
                     <div className="w-16 h-16 overflow-hidden rounded-lg">
                       <img
-                        src={typeof product.image === 'string' ? product.image : undefined}
+                        src={product.mainImage}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
@@ -58,8 +63,10 @@ const ProductsList = () => {
                   )}
                 </td>
                 <td className="py-4 px-4 border-b">{product.name}</td>
-                <td className="py-4 px-4 border-b">{product.brand || '-'}</td>
-                <td className="py-4 px-4 border-b max-w-xs truncate">{product.description}</td>
+                <td className="py-4 px-4 border-b">{product.brand || "-"}</td>
+                <td className="py-4 px-4 border-b max-w-xs truncate">
+                  {product.description}
+                </td>
                 <td className="py-4 px-4 border-b">{product.stock}</td>
                 <td className="py-4 px-4 border-b relative">
                   <div className="flex gap-2">
@@ -82,8 +89,8 @@ const ProductsList = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => {
-                            deleteProduct(product._id!).catch(error => {
-                              console.error('Error deleting product:', error);
+                            deleteProduct(product._id!).catch((error) => {
+                              console.error("Error deleting product:", error);
                             });
                             setDeletingProduct(null);
                           }}

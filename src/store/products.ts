@@ -9,7 +9,9 @@ export interface Product {
   price: number;
   stock: number;
   available: boolean;
-  image: string | File | null;  // Permitir null para cuando no haya imagen
+  images: string[]; // Array de URLs de imágenes
+  mainImage: string; // URL de la imagen principal
+  categories: string[];
 }
 
 // Definición de la interfaz ProductStore
@@ -19,12 +21,12 @@ interface ProductStore {
   addProduct: (formData: FormData) => Promise<void>;
   updateProduct: (id: string, formData: FormData) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
+  deleteImage: (id: string, imageIndex: number) => Promise<void>; 
 }
 
 export const useProductStore = create<ProductStore>((set) => ({
   products: [],
 
-  // Función para obtener productos
   fetchProducts: async () => {
     try {
       const token = localStorage.getItem('token');
@@ -52,7 +54,6 @@ export const useProductStore = create<ProductStore>((set) => ({
     }
   },
 
-  // Función para agregar un producto
   addProduct: async (formData) => {
     try {
       const token = localStorage.getItem('token');
@@ -62,7 +63,7 @@ export const useProductStore = create<ProductStore>((set) => ({
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
         method: 'POST',
-        headers: { 
+        headers: {
           Authorization: `Bearer ${token}`,
         },
         body: formData,
@@ -81,7 +82,6 @@ export const useProductStore = create<ProductStore>((set) => ({
     }
   },
 
-  // Función para actualizar un producto
   updateProduct: async (id, formData) => {
     try {
       const token = localStorage.getItem('token');
@@ -114,7 +114,6 @@ export const useProductStore = create<ProductStore>((set) => ({
     }
   },
 
-  // Función para eliminar un producto
   deleteProduct: async (id) => {
     try {
       const token = localStorage.getItem('token');
@@ -140,6 +139,47 @@ export const useProductStore = create<ProductStore>((set) => ({
     } catch (error: any) {
       console.error('Error deleting product:', error);
       throw new Error(error.message || 'Error al eliminar producto');
+    }
+  },
+
+  deleteImage: async (id: string, imageIndex: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación');
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/products/${id}/images/${imageIndex}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al eliminar la imagen');
+      }
+
+      // Actualizar la lista de productos después de eliminar la imagen
+      set((state) => ({
+        products: state.products.map((p) =>
+          p._id === id
+            ? {
+                ...p,
+                images: p.images.filter((_, index) => index !== imageIndex),
+                mainImage:
+                  p.mainImage === p.images[imageIndex] ? p.images[0] || '' : p.mainImage,
+              }
+            : p
+        ),
+      }));
+    } catch (error: any) {
+      console.error('Error deleting image:', error);
+      throw new Error(error.message || 'Error al eliminar la imagen');
     }
   },
 }));
