@@ -18,6 +18,7 @@ import ProductsList from "./pages/products/ProductsList";
 import ProductForm from "./components/forms/ProductForm";
 import UsersList from "./pages/users/UsersList";
 import UserForm from "./components/forms/UserForm";
+import AdminSettings from "./pages/settings/AdminSettings"
 
 function App() {
   return (
@@ -62,6 +63,14 @@ function App() {
             element={
               <AdminLayout>
                 <ServicesList />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/settings"
+            element={
+              <AdminLayout>
+                <AdminSettings />
               </AdminLayout>
             }
           />
