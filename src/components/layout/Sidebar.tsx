@@ -11,7 +11,7 @@ const Sidebar = () => {
   // Definir los elementos del menú
   const menuItems = [
     { icon: Home, name: 'Dashboard', path: '/admin' },
-    { icon: Calendar, name: 'Citas', path: '/admin/appointments' },
+    { icon: Calendar, name: 'Calendario', path: '/admin/appointments' },
     { icon: Scissors, name: 'Servicios', path: '/admin/services' },
     { icon: ShoppingBag, name: 'Productos', path: '/admin/products' },
     { icon: Users, name: 'Usuarios', path: '/admin/users', role: 'superadmin' }, // Solo para superadmin

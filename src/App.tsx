@@ -19,6 +19,7 @@ import ProductForm from "./components/forms/ProductForm";
 import UsersList from "./pages/users/UsersList";
 import UserForm from "./components/forms/UserForm";
 import AdminSettings from "./pages/settings/AdminSettings"
+import AppointmentsCalendarPage from "./components/appointments/AppointmentsCalendar";
 
 function App() {
   return (
@@ -95,6 +96,14 @@ function App() {
             element={
               <AdminLayout>
                 <ProductsList />
+              </AdminLayout>
+            }
+          />
+            <Route
+            path="/admin/appointments"
+            element={
+              <AdminLayout>
+                <AppointmentsCalendarPage />
               </AdminLayout>
             }
           />
