@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useUserStore } from '../../store/userStore'; // Importar el store de usuario
+import { useUserStore } from '../../store/userStore';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { setCurrentUser } = useUserStore(); // Obtener la función para establecer el usuario actual
+  const { setCurrentUser } = useUserStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/login`, {
@@ -42,6 +45,8 @@ const LoginPage = () => {
       }
     } catch (error) {
       setError('Error de conexión. Inténtalo de nuevo.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,6 +64,7 @@ const LoginPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-amber-500 focus:border-amber-500"
               required
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -69,13 +75,15 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-amber-500 focus:border-amber-500"
               required
+              disabled={isLoading}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
+            className="w-full bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading}
           >
-            Iniciar Sesión
+            {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
           <p className="text-center text-sm text-gray-600">
             ¿No tienes una cuenta?{' '}

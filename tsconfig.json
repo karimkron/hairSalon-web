@@ -5,6 +5,7 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "types": ["node"],
 
     /* Bundler mode */
     "moduleResolution": "node",
@@ -26,7 +27,7 @@
     "noImplicitAny": true,
 
     /* Agregado para soportar import.meta.env */
-    "types": ["vite/client"],
+    
     
     /* Permitir importaciones por defecto en módulos CommonJS */
     "allowSyntheticDefaultImports": true,

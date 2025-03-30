@@ -1,16 +1,18 @@
-import { Home, Users, Calendar, Scissors, DollarSign, Settings, Menu, X, ShoppingBag } from 'lucide-react';
+import { Users, Calendar, Scissors, DollarSign, Settings, Menu, X, ShoppingBag, BarChart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useUIStore } from '../../store/uiStore';
-import { useUserStore } from '../../store/userStore'; // Importar el store de usuario
+import { useUserStore } from '../../store/userStore';
+import { useAuth } from '../../context/AuthProvider';
 
 const Sidebar = () => {
   const location = useLocation();
   const { isSidebarOpen, toggleSidebar } = useUIStore();
-  const { currentUser } = useUserStore(); // Obtener el usuario actual
+  const { currentUser } = useUserStore();
+  const { isInitializing } = useAuth();
 
-  // Definir los elementos del menú
+  // Definir los elementos del menú (cambiado el ícono de Dashboard a BarChart)
   const menuItems = [
-    { icon: Home, name: 'Dashboard', path: '/admin' },
+    { icon: BarChart, name: 'Dashboard', path: '/admin' },
     { icon: Calendar, name: 'Calendario', path: '/admin/appointments' },
     { icon: Scissors, name: 'Servicios', path: '/admin/services' },
     { icon: ShoppingBag, name: 'Productos', path: '/admin/products' },
@@ -21,8 +23,12 @@ const Sidebar = () => {
 
   // Filtrar los elementos del menú según el rol del usuario
   const filteredMenuItems = menuItems.filter((item) => {
+    // Si está inicializando, mostrar todos los elementos
+    if (isInitializing) return true;
+
+    // Si el item tiene restricción de rol, verificar si el usuario actual tiene ese rol
     if (item.role) {
-      return currentUser?.role === item.role; // Mostrar solo si el rol del usuario coincide
+      return currentUser?.role === item.role;
     }
     return true; // Mostrar siempre si no tiene restricción de rol
   });
