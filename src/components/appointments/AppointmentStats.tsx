@@ -170,9 +170,20 @@ const AppointmentStats: React.FC<AppointmentStatsProps> = ({ stats }) => {
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
+              <XAxis 
+                dataKey="date" 
+                tickFormatter={(value) => {
+                  const date = new Date(value);
+                  return `${date.getDate()}/${date.getMonth() + 1}`;
+                }}
+              />
               <YAxis />
-              <Tooltip />
+              <Tooltip 
+                labelFormatter={(value) => {
+                  const date = new Date(value);
+                  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                }}
+              />
               <Legend />
               <Line 
                 type="monotone" 

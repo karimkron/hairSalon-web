@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Calendar, Users, Package, Scissors, Settings, 
-  FileText, CreditCard, PlusCircle
+  FileText,
 } from 'lucide-react';
 
 const QuickActionsPanel: React.FC = () => {
@@ -76,19 +76,6 @@ const QuickActionsPanel: React.FC = () => {
           </span>
           <span className="mt-2 text-sm text-center font-medium text-gray-700">Configuración</span>
         </Link>
-      </div>
-      
-      {/* Acciones secundarias */}
-      <div className="mt-6 pt-4 border-t grid grid-cols-2 gap-4">
-        <button className="flex items-center justify-center gap-2 bg-amber-600 text-white py-2 px-4 rounded-lg hover:bg-amber-700 transition-colors text-sm">
-          <PlusCircle className="h-4 w-4" />
-          <span>Nueva Venta Rápida</span>
-        </button>
-        
-        <button className="flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm">
-          <CreditCard className="h-4 w-4" />
-          <span>Procesar Pago</span>
-        </button>
       </div>
     </div>
   );

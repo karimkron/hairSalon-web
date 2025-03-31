@@ -207,7 +207,7 @@ const UserForm = () => {
               {user.phone || 'Haz clic para editar'}
             </button>
           </div>
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700">Rango</label>
             <button
               type="button"
@@ -216,7 +216,7 @@ const UserForm = () => {
             >
               {user.rank || 'Haz clic para editar'}
             </button>
-          </div>
+          </div> */}
         </div>
         <div className="flex justify-end gap-4">
           <button
