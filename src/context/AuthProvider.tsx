@@ -12,7 +12,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { fetchCurrentUser, currentUser, isLoading } = useUserStore();
+  const { fetchCurrentUser, isLoading } = useUserStore();
   const [isInitializing, setIsInitializing] = React.useState(true);
 
   useEffect(() => {

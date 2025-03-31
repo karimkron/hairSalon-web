@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Edit, ChevronLeft, ChevronRight, Users, X, Check } from 'lucide-react';
-import { useUserStore } from '../../store/userStore';
 import debounce from 'lodash/debounce';
 
 interface PaginationMetadata {
