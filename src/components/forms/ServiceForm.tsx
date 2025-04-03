@@ -9,29 +9,36 @@ interface Service {
   price: number;
   points: number;
   duration: number;  // Cambiado a number
-  category: string;
+  categories: string[];  // Cambiado de category a categories (array)
   image: File | string | null;
 }
 
 const ServiceForm = () => {
   const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const { services, addService, updateService } = useServiceStore();
+  const { services, categories, fetchServices, fetchCategories, addService, updateService, addCategory } = useServiceStore();
   const [service, setService] = useState<Service>({
     name: '',
     description: '',
     price: 0,
     points: 0,
-    duration: 1,  // Inicializado como número
-    category: '',
+    duration: 1,
+    categories: [],  // Inicializado como array vacío
     image: null,
   });
 
   const [imageOption, setImageOption] = useState<'upload' | 'url' | 'none'>(id ? 'url' : 'upload');
   const [imageUrl, setImageUrl] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);  // Estado para categorías seleccionadas
+  const [newCategory, setNewCategory] = useState<string>('');  // Estado para nueva categoría
 
-   useEffect(() => {
+  useEffect(() => {
+    fetchServices();
+    fetchCategories();
+  }, [fetchServices, fetchCategories]);
+
+  useEffect(() => {
     if (id) {
       const existingService = services.find((s) => s._id === id);
       if (existingService) {
@@ -39,11 +46,12 @@ const ServiceForm = () => {
           ...existingService,
           duration: existingService.duration,
         });
+        setSelectedCategories(existingService.categories || []);
         setImageUrl(existingService.image || '');
         setImageOption(existingService.image ? 'url' : 'none');
       }
     }
-  }, [id]);
+  }, [id, services]);
 
   const isValidUrl = (url: string) => {
     try {
@@ -51,6 +59,21 @@ const ServiceForm = () => {
       return true;
     } catch {
       return false;
+    }
+  };
+
+  // Función para manejar cuando se agrega una nueva categoría
+  const handleAddCategory = async () => {
+    if (newCategory.trim() && !categories.includes(newCategory.trim())) {
+      try {
+        await addCategory(newCategory.trim());
+        setSelectedCategories([...selectedCategories, newCategory.trim()]);
+        setNewCategory('');
+      } catch (error) {
+        setErrors({ ...errors, category: 'Error al agregar categoría' });
+      }
+    } else if (categories.includes(newCategory.trim())) {
+      setErrors({ ...errors, category: 'Esta categoría ya existe' });
     }
   };
 
@@ -62,7 +85,7 @@ const ServiceForm = () => {
     if (service.price <= 0) newErrors.price = 'Precio inválido';
     if (service.points < 0) newErrors.points = 'Puntos inválidos';
     if (service.duration < 1) newErrors.duration = 'Duración mínima: 1 hora';
-    if (!service.category.trim()) newErrors.category = 'Categoría requerida';
+    if (selectedCategories.length === 0) newErrors.category = 'Selecciona al menos una categoría';
 
     if (imageOption === 'url' && !isValidUrl(imageUrl)) {
       newErrors.image = 'URL inválida';
@@ -100,7 +123,11 @@ const ServiceForm = () => {
     formData.append('price', service.price.toString());
     formData.append('points', service.points.toString());
     formData.append('duration', service.duration.toString());
-    formData.append('category', service.category);
+    
+    // Añadir categorías seleccionadas
+    selectedCategories.forEach((category, index) => {
+      formData.append(`categories[${index}]`, category);
+    });
 
     switch (imageOption) {
       case 'upload':
@@ -126,6 +153,10 @@ const ServiceForm = () => {
     } catch (error: any) {
       setErrors({ general: error.message || 'Error al guardar el servicio' });
     }
+  };
+
+  const getInitial = (name: string) => {
+    return name.charAt(0).toUpperCase();
   };
 
   return (
@@ -160,23 +191,71 @@ const ServiceForm = () => {
                 {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
               </div>
 
+              {/* Selector de categorías */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Categoría</label>
-                <select
-                  name="category"
-                  value={service.category}
-                  onChange={(e) => setService({...service, category: e.target.value})}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                >
-                  <option value="">Selecciona una categoría</option>
-                  <option value="Cortes Clásicos">Cortes Clásicos</option>
-                  <option value="Servicios Premium">Servicios Premium</option>
-                  <option value="Tratamientos Especiales">Tratamientos Especiales</option>
-                </select>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Categorías</label>
+                <div className="mb-2">
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value && !selectedCategories.includes(e.target.value)) {
+                        setSelectedCategories([...selectedCategories, e.target.value]);
+                        setErrors({...errors, category: ''});
+                      }
+                    }}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500"
+                  >
+                    <option value="">-- Seleccionar categoría --</option>
+                    {categories.map((category, index) => (
+                      <option key={index} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Categorías seleccionadas */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {selectedCategories.map((category, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center bg-gray-100 px-2 py-1 rounded"
+                    >
+                      <span className="text-sm">{category}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newCategories = [...selectedCategories];
+                          newCategories.splice(index, 1);
+                          setSelectedCategories(newCategories);
+                        }}
+                        className="ml-1 text-gray-500 hover:text-gray-700"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Agregar nueva categoría */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    placeholder="Nueva categoría"
+                    className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCategory}
+                    className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600"
+                  >
+                    Agregar
+                  </button>
+                </div>
                 {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
               </div>
-
-              
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">Precio</label>
@@ -207,7 +286,7 @@ const ServiceForm = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Duración (horas)</label>
+                <label className="block text-sm font-medium text-gray-700">Duración (minutos)</label>
                 <input
                   type="number"
                   name="duration"
@@ -220,8 +299,6 @@ const ServiceForm = () => {
                 />
                 {errors.duration && <p className="text-red-500 text-sm mt-1">{errors.duration}</p>}
               </div>
-
-              
 
               <div className="block">
                 <label className="block text-sm font-medium text-gray-700">Descripción</label>
@@ -302,8 +379,6 @@ const ServiceForm = () => {
                   </div>
                 )}
               </div>
-
-              
             </div>
 
             {errors.general && (

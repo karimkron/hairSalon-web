@@ -69,7 +69,6 @@ export const useSalesStore = create<SalesStore>((set) => ({
       }
       
       // Hacer la petición al backend para obtener datos de ventas
-      // Cambiamos process.env.REACT_APP_API_URL por import.meta.env.VITE_API_URL
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const response = await fetch(
         `${apiUrl}/api/sales/dashboard?startDate=${startDate}&endDate=${endDate}`,

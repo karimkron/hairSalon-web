@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 
 // Definición de la interfaz Service
@@ -8,14 +9,17 @@ interface Service {
   price: number;
   points: number;
   duration: number;
-  category: string;
+  categories: string[];  // Cambiado de category a categories (array)
   image: string;
 }
 
 // Definición de la interfaz ServiceStore
 interface ServiceStore {
   services: Service[];
+  categories: string[];  // Nueva propiedad para almacenar categorías
   fetchServices: () => Promise<void>;
+  fetchCategories: () => Promise<void>;  // Nueva función para obtener categorías
+  addCategory: (category: string) => Promise<void>;  // Nueva función para añadir categoría
   addService: (formData: FormData) => Promise<void>;
   updateService: (id: string, formData: FormData) => Promise<void>;
   deleteService: (id: string) => Promise<void>;
@@ -24,6 +28,7 @@ interface ServiceStore {
 // Creación del store usando Zustand
 const useServiceStore = create<ServiceStore>((set) => ({
   services: [],
+  categories: [],
 
   // Función para obtener servicios
   fetchServices: async () => {
@@ -38,6 +43,42 @@ const useServiceStore = create<ServiceStore>((set) => ({
       set({ services: data });
     } catch (error) {
       console.error('Error fetching services:', error);
+      throw error;
+    }
+  },
+
+  // Nueva función para obtener categorías
+  fetchCategories: async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/services/categories`);
+      if (!response.ok) throw new Error('Error al obtener categorías');
+      const data = await response.json();
+      set({ categories: data });
+    } catch (error) {
+      console.error('Error fetching service categories:', error);
+      throw error;
+    }
+  },
+
+  // Nueva función para añadir categoría
+  addCategory: async (category) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/services/categories`, {
+        method: 'POST',
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ category }),
+      });
+
+      if (!response.ok) throw new Error('Error al agregar categoría');
+      const data = await response.json();
+      set((state) => ({ categories: [...state.categories, data.category] }));
+      return data.category;
+    } catch (error) {
+      console.error('Error adding service category:', error);
       throw error;
     }
   },
