@@ -155,10 +155,6 @@ const ServiceForm = () => {
     }
   };
 
-  const getInitial = (name: string) => {
-    return name.charAt(0).toUpperCase();
-  };
-
   return (
     <div className=" inset-0 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-auto">
